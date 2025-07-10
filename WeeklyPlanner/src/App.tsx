@@ -11,10 +11,11 @@ import {
 import { useStore } from './store';
 import { generateWeek, getCurrentWeekStart } from './utils/dateUtils';
 import { COLORS, SPACING, BORDER_RADIUS, SHADOWS } from './utils/constants';
-import { Task } from './types';
-import WeekView from './components/WeekView';
+import { Task, Template } from './types';
+import WeekViewGrid from './components/WeekViewGrid';
 import TemplateModal from './components/TemplateModal';
 import AddTaskModal from './components/AddTaskModal';
+import CreateTemplateModal from './components/CreateTemplateModal';
 
 const App: React.FC = () => {
   const {
@@ -24,6 +25,7 @@ const App: React.FC = () => {
     addWeek,
     setCurrentWeek,
     addTask,
+    addTemplate,
     toggleTaskCompletion,
     toggleSubtaskCompletion,
     toggleTaskExpansion,
@@ -33,6 +35,7 @@ const App: React.FC = () => {
 
   const [templateModalVisible, setTemplateModalVisible] = useState(false);
   const [addTaskModalVisible, setAddTaskModalVisible] = useState(false);
+  const [createTemplateModalVisible, setCreateTemplateModalVisible] = useState(false);
   const [selectedDayId, setSelectedDayId] = useState<string | undefined>();
 
   // Initialize with current week if no weeks exist
@@ -74,19 +77,42 @@ const App: React.FC = () => {
 
   const handleAddTaskSubmit = (task: Omit<Task, 'id'>) => {
     if (selectedDayId) {
-      addTask(selectedDayId, task);
+      // Generate a unique id for the new task
+      const newTask: Task = {
+        ...task,
+        id: Date.now().toString(),
+      };
+      addTask(selectedDayId, newTask);
     }
   };
 
   const handleDeleteTask = (dayId: string, taskId: string) => {
-    Alert.alert(
-      'Delete Task',
-      'Are you sure you want to delete this task?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => deleteTask(dayId, taskId) }
-      ]
-    );
+    console.log('Delete task called:', { dayId, taskId });
+    
+    if (Platform.OS === 'web') {
+      // Use browser confirm for web
+      if (window.confirm('Are you sure you want to delete this task?')) {
+        console.log('Deleting task (web):', { dayId, taskId });
+        deleteTask(dayId, taskId);
+      }
+    } else {
+      // Use Alert for mobile
+      Alert.alert(
+        'Delete Task',
+        'Are you sure you want to delete this task?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Delete', 
+            style: 'destructive', 
+            onPress: () => {
+              console.log('Deleting task (mobile):', { dayId, taskId });
+              deleteTask(dayId, taskId);
+            }
+          }
+        ]
+      );
+    }
   };
 
   const handleApplyTemplate = (dayId: string) => {
@@ -98,6 +124,10 @@ const App: React.FC = () => {
     if (selectedDayId) {
       applyTemplate(templateId, selectedDayId, options);
     }
+  };
+
+  const handleCreateTemplate = (template: Omit<Template, 'id'>) => {
+    addTemplate(template);
   };
 
   if (!currentWeek) {
@@ -139,8 +169,8 @@ const App: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Week View */}
-      <WeekView
+      {/* Week View Grid */}
+      <WeekViewGrid
         week={currentWeek}
         onToggleTaskCompletion={toggleTaskCompletion}
         onToggleSubtaskCompletion={toggleSubtaskCompletion}
@@ -166,6 +196,13 @@ const App: React.FC = () => {
         onAddTask={handleAddTaskSubmit}
       />
 
+      {/* Create Template Modal */}
+      <CreateTemplateModal
+        visible={createTemplateModalVisible}
+        onClose={() => setCreateTemplateModalVisible(false)}
+        onSaveTemplate={handleCreateTemplate}
+      />
+
       {/* Quick Actions */}
       <View style={styles.quickActions}>
         <TouchableOpacity
@@ -180,6 +217,13 @@ const App: React.FC = () => {
           onPress={() => setTemplateModalVisible(true)}
         >
           <Text style={styles.quickActionText}>📋 Templates</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={styles.quickActionButton}
+          onPress={() => setCreateTemplateModalVisible(true)}
+        >
+          <Text style={styles.quickActionText}>✨ Create Template</Text>
         </TouchableOpacity>
       </View>
     </View>

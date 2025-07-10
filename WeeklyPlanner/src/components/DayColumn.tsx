@@ -86,17 +86,20 @@ const DayColumn: React.FC<DayColumnProps> = ({
             )}
           </View>
         ) : (
-          day.tasks.map((task) => (
-            <TaskItem
-              key={task.id}
-              task={task}
-              dayId={day.id}
-              onToggleCompletion={onToggleTaskCompletion}
-              onToggleSubtaskCompletion={onToggleSubtaskCompletion}
-              onToggleExpansion={onToggleTaskExpansion}
-              onDelete={onDeleteTask}
-            />
-          ))
+          day.tasks.map((task) => {
+            console.log('Rendering task with onDelete:', !!onDeleteTask, 'taskId:', task.id);
+            return (
+              <TaskItem
+                key={task.id}
+                task={task}
+                dayId={day.id}
+                onToggleCompletion={onToggleTaskCompletion}
+                onToggleSubtaskCompletion={onToggleSubtaskCompletion}
+                onToggleExpansion={onToggleTaskExpansion}
+                onDelete={onDeleteTask}
+              />
+            );
+          })
         )}
       </ScrollView>
 

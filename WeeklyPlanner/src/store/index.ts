@@ -53,7 +53,74 @@ export const useStore = create<AppStore>()(
   persist(
     (set, get) => ({
       // Initial state
-      weeks: [],
+      weeks: [
+        {
+          id: 'test-week',
+          startDate: '2024-01-01',
+          endDate: '2024-01-07',
+          days: [
+            {
+              id: 'day-0-2024-01-01',
+              date: '2024-01-01',
+              dayName: 'Mon',
+              tasks: [
+                {
+                  id: 'test-task-1',
+                  text: 'Test Task 1',
+                  priority: 'high',
+                  completed: false,
+                  subtasks: [],
+                  expanded: false
+                },
+                {
+                  id: 'test-task-2',
+                  text: 'Test Task 2',
+                  priority: 'medium',
+                  completed: false,
+                  subtasks: [],
+                  expanded: false
+                }
+              ]
+            },
+            {
+              id: 'day-1-2024-01-02',
+              date: '2024-01-02',
+              dayName: 'Tue',
+              tasks: []
+            },
+            {
+              id: 'day-2-2024-01-03',
+              date: '2024-01-03',
+              dayName: 'Wed',
+              tasks: []
+            },
+            {
+              id: 'day-3-2024-01-04',
+              date: '2024-01-04',
+              dayName: 'Thu',
+              tasks: []
+            },
+            {
+              id: 'day-4-2024-01-05',
+              date: '2024-01-05',
+              dayName: 'Fri',
+              tasks: []
+            },
+            {
+              id: 'day-5-2024-01-06',
+              date: '2024-01-06',
+              dayName: 'Sat',
+              tasks: []
+            },
+            {
+              id: 'day-6-2024-01-07',
+              date: '2024-01-07',
+              dayName: 'Sun',
+              tasks: []
+            }
+          ]
+        }
+      ],
       templates: [
         {
           id: 'work-day',
@@ -191,16 +258,24 @@ export const useStore = create<AppStore>()(
         }))
       })),
 
-      deleteTask: (dayId, taskId) => set((state) => ({
-        weeks: state.weeks.map(week => ({
-          ...week,
-          days: week.days.map(day => 
-            day.id === dayId 
-              ? { ...day, tasks: day.tasks.filter(task => task.id !== taskId) }
-              : day
-          )
-        }))
-      })),
+      deleteTask: (dayId, taskId) => {
+        console.log('Store deleteTask called:', { dayId, taskId });
+        set((state) => {
+          console.log('Current state weeks:', state.weeks.length);
+          const newState = {
+            weeks: state.weeks.map(week => ({
+              ...week,
+              days: week.days.map(day => 
+                day.id === dayId 
+                  ? { ...day, tasks: day.tasks.filter(task => task.id !== taskId) }
+                  : day
+              )
+            }))
+          };
+          console.log('New state weeks:', newState.weeks.length);
+          return newState;
+        });
+      },
 
       toggleTaskCompletion: (dayId, taskId) => set((state) => ({
         weeks: state.weeks.map(week => ({
@@ -265,7 +340,7 @@ export const useStore = create<AppStore>()(
 
       // Template management actions
       addTemplate: (template) => set((state) => ({
-        templates: [...state.templates, template]
+        templates: [...state.templates, { ...template, id: generateId() }]
       })),
 
       updateTemplate: (templateId, updatedTemplate) => set((state) => ({

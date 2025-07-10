@@ -26,6 +26,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
   onToggleExpansion,
   onDelete,
 }) => {
+  console.log('TaskItem render - onDelete prop:', !!onDelete, 'taskId:', task.id);
   const priorityColor = PRIORITY_COLORS[task.priority];
   const priorityIcon = PRIORITY_ICONS[task.priority];
 
@@ -84,10 +85,14 @@ const TaskItem: React.FC<TaskItemProps> = ({
           
           {onDelete && (
             <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={() => onDelete(dayId, task.id)}
+              style={[styles.deleteButton, { borderWidth: 1, borderColor: 'red' }]}
+              onPress={() => {
+                console.log('Delete button pressed for task:', task.id);
+                onDelete(dayId, task.id);
+              }}
+              accessibilityLabel="Delete task"
             >
-              <Text style={styles.deleteIcon}>×</Text>
+              <Text style={styles.deleteIcon}>🗑️</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -182,9 +187,14 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     padding: SPACING.xs,
+    backgroundColor: COLORS.error + '20',
+    borderRadius: BORDER_RADIUS.sm,
+    minWidth: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   deleteIcon: {
-    fontSize: 18,
+    fontSize: 16,
     color: COLORS.error,
     fontWeight: 'bold',
   },
